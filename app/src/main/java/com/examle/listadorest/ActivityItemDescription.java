@@ -61,35 +61,11 @@ public class ActivityItemDescription extends Activity{
                     String path = jResults.getJSONObject(Position_item).getString("icon").toString();
                     String lat = jLocation.getString("lat");
                     String lng = jLocation.getString("lng");
-                    //String path = jIcon.optString("icon");
-                    //String imagenpath = jIcon.getString("icon");
-                    //String imagenpath = jIcon.getString("icon");
-                    //Log.e(TAG,"path" + jIcon.names());
-                    //Log.e(TAG,"path" + jIcon.get(""));
-                    Log.e(TAG,"path: " + path);
-
-
+                    //Log.e(TAG,"path: " + path);
                     tv_lat.setText(lat+"");
                     tv_long.setText(lng+"");
                     tv_lugar.setText("Lugar No " + Position_item);
                     Picasso.get().load(path).into(img_lugar);
-
-
-                    /*for (int j = 0; j < jResults.length(); j++) {
-                        Lugares[j] = "Lugar : " +j;
-                        JSONObject jPlaceObj = jResults.getJSONObject(j);
-                        JSONObject jGeometry =  jPlaceObj.getJSONObject("geometry");
-                        JSONObject jLocation = jGeometry.getJSONObject("location");
-
-                        String lat = jLocation.getString("lat");
-                        String lng = jLocation.getString("lng");
-                        //Log.e(TAG,"lat" + lat);
-                        //Log.e(TAG,"lng" + lng);
-                        Log.e(TAG,"Lugar: " +Lugares[j]);
-                        tv_lat.setText(lat+"");
-                        tv_lat.setText(lng+"");
-                        tv_lugar.setText(item);
-                    }*/
 
 
                 } catch (JSONException e) {
