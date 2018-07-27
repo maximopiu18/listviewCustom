@@ -1,15 +1,12 @@
 package com.examle.listadorest;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.View;
-import android.webkit.JsResult;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -17,28 +14,36 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends Activity {
-    String TAG="Main Activity";
-    RequestQueue requestQueue;
-     public static  ListView lista;
-    String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&key=AIzaSyDqLifooX1uMPIHleIFsugUkZPptfU1zzw";
-    String Lugares[];
-    public static ArrayAdapter<String> adapterJson;
-    public static int position_item;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        lista = (ListView)findViewById(R.id.main_Listview);
-        ConsultaRest();
-        EventListenerList();
-    }
+/**
+ * Created by maximopiu18 on 26/07/2018.
+ */
 
+public class ActivityItemDescription extends Activity{
+    String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&key=AIzaSyDqLifooX1uMPIHleIFsugUkZPptfU1zzw";
+    TextView tv_lat,tv_long,tv_lugar;
+    ImageView img_lugar;
+    RequestQueue requestQueue;
+    String TAG = "ActivityItemDescription";
+    String Lugares[];
+    int Position_item;
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_description_item);
+        Position_item = MainActivity.position_item;
+        tv_lat = (TextView)findViewById(R.id.tv_latitud);
+        tv_long = (TextView)findViewById(R.id.tv_longitude);
+        tv_lugar = (TextView)findViewById(R.id.tv_lugaritem);
+        img_lugar = (ImageView)findViewById(R.id.img_lugar);
+        ConsultaRest();
+
+    }
     public void ConsultaRest(){
         requestQueue = Volley.newRequestQueue(this);
         StringRequest getRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
@@ -47,10 +52,30 @@ public class MainActivity extends Activity {
                 try {
                     JSONObject jObject = new JSONObject(response);
                     JSONArray jResults = jObject.getJSONArray("results");
-                    Log.e(TAG,"results: " + jResults.toString());
-
+//                    Log.e(TAG,"results: " + jResults.toString());
                     Lugares = new String[jResults.length()];
-                    for (int j = 0; j < jResults.length(); j++) {
+
+                    JSONObject jPlaceObj = jResults.getJSONObject(Position_item);
+                    JSONObject jGeometry =  jPlaceObj.getJSONObject("geometry");
+                    JSONObject jLocation = jGeometry.getJSONObject("location");
+                    String path = jResults.getJSONObject(Position_item).getString("icon").toString();
+                    String lat = jLocation.getString("lat");
+                    String lng = jLocation.getString("lng");
+                    //String path = jIcon.optString("icon");
+                    //String imagenpath = jIcon.getString("icon");
+                    //String imagenpath = jIcon.getString("icon");
+                    //Log.e(TAG,"path" + jIcon.names());
+                    //Log.e(TAG,"path" + jIcon.get(""));
+                    Log.e(TAG,"path: " + path);
+
+
+                    tv_lat.setText(lat+"");
+                    tv_long.setText(lng+"");
+                    tv_lugar.setText("Lugar No " + Position_item);
+                    Picasso.get().load(path).into(img_lugar);
+
+
+                    /*for (int j = 0; j < jResults.length(); j++) {
                         Lugares[j] = "Lugar : " +j;
                         JSONObject jPlaceObj = jResults.getJSONObject(j);
                         JSONObject jGeometry =  jPlaceObj.getJSONObject("geometry");
@@ -61,9 +86,11 @@ public class MainActivity extends Activity {
                         //Log.e(TAG,"lat" + lat);
                         //Log.e(TAG,"lng" + lng);
                         Log.e(TAG,"Lugar: " +Lugares[j]);
-                    }
-                    adapterJson = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1,Lugares);
-                    lista.setAdapter(adapterJson);
+                        tv_lat.setText(lat+"");
+                        tv_lat.setText(lng+"");
+                        tv_lugar.setText(item);
+                    }*/
+
 
                 } catch (JSONException e) {
                     Log.e("error","error" + e);
@@ -78,28 +105,4 @@ public class MainActivity extends Activity {
         });
         requestQueue.add(getRequest);
     }
-
-    public void EventListenerList(){
-        /*lista.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });*/
-        lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Log.e(TAG,"position" + position);
-                position_item = position;
-                Intent intent = new Intent(MainActivity.this, ActivityItemDescription.class);
-                startActivity(intent);
-            }
-        });
-    }
-
 }
