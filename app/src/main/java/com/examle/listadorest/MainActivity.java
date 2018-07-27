@@ -3,6 +3,7 @@ package com.examle.listadorest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -27,11 +28,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity {
+    int contador=0;
+    JSONArray jResults;
     String TAG="Main Activity";
     RequestQueue requestQueue;
      public static  ListView lista;
+    public static  ListView lista2;
     String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&key=AIzaSyDqLifooX1uMPIHleIFsugUkZPptfU1zzw";
     String Lugares[];
+    String LugaresFavoritos[];
     public static ArrayAdapter<String> adapterJson;
     public static int position_item;
     public static  Context c;
@@ -43,6 +48,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         c = MainActivity.this;
         lista = (ListView)findViewById(R.id.main_Listview);
+        lista2 = (ListView)findViewById(R.id.main_Listview2);
         TabHost host = (TabHost)findViewById(R.id.tabHost);
         host.setup();
 
@@ -66,38 +72,15 @@ public class MainActivity extends Activity {
                 if(tabId.equals("1")) {
                     //
                     ConsultaRest();
-                    EventListenerList();
+                    //EventListenerList();
                 }
                 else if(tabId.equals("2")) {
                     //
+                    llenarListViewFavoritos();
                 }
             }});
-
-        /*tabHost.getTabWidget().getChildTabViewAt(0).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                tabHost.setCurrentTab(0);
-            }
-        });
-*/
-        /*tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
-
-            @Override
-            public void onTabChanged(String s) {
-                int i = tabHost.getCurrentTab();
-                if(i==0){
-                    Log.e(TAG,"tab 1");
-
-                    ConsultaRest();
-                    EventListenerList();
-                }
-                else if(i==1){
-                    Log.e(TAG,"tab 2");
-                }
-            }
-        });*/
         ConsultaRest();
-        EventListenerList();
+        //EventListenerList();
     }
 
     public void ConsultaRest(){
@@ -108,7 +91,7 @@ public class MainActivity extends Activity {
             public void onResponse(String response) {
                 try {
                     JSONObject jObject = new JSONObject(response);
-                    JSONArray jResults = jObject.getJSONArray("results");
+                    jResults = jObject.getJSONArray("results");
                     Log.e(TAG,"results: " + jResults.toString());
 
                     Lugares = new String[jResults.length()];
@@ -147,31 +130,69 @@ public class MainActivity extends Activity {
         });
         requestQueue.add(getRequest);
     }
-
     public void EventListenerList(){
-        /*lista.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });*/
-        /*lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        lista2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Log.e(TAG,"position" + position);
-                position_item = position;
+
+
+                position_item = Integer.valueOf(LugaresFavoritos[position]);
                 Intent intent = new Intent(MainActivity.this, ActivityItemDescription.class);
                 startActivity(intent);
             }
-        });*/
+        });
     }
-    public void EjecutarIntent(int position,Context c){
+    public void llenarListViewFavoritos(){
 
+        //ConsultaRestFavoritos();
+        consultar_preferencia();
+        try{
+            lista2.setAdapter(null);
+            adapterJson = null;
+        }catch (Exception e)
+        {
+            Log.e("Error","error" + e);
+        }
+
+        if(LugaresFavoritos.length>0) {
+            adapterJson = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, LugaresFavoritos);
+            lista2.setAdapter(adapterJson);
+            EventListenerList();
+        }
+    }
+
+    public void consultar_preferencia(){
+        SharedPreferences pref = getSharedPreferences("preferencias", Context.MODE_PRIVATE);
+        final List<ItemObject> listViewItems2 = new ArrayList<ItemObject>();
+        int i =0;
+        contador=0;
+        while(i<jResults.length()) {
+            String item = pref.getString("item_" + i, "null");
+            if(item.equals("1"))
+            {
+               contador++;
+    //            Log.e("item", "lugar: " + i + " favorito: " + item);
+
+            }
+            i++;
+        }
+        LugaresFavoritos = new String[contador];
+        //LugaresFavoritosPositionReal = new String[contador];
+//        Log.e("lengt","length" + LugaresFavoritos.length);
+        i=0;
+        int h =0;
+        while(i<jResults.length()) {
+            String item = pref.getString("item_" + i, "null");
+            if(item.equals("1"))
+            {
+                //contador++;
+                //Log.e("item", "lugar: " + i + " favorito: " + item);
+                LugaresFavoritos[h] = ""+ i;
+                Log.e("Lugares: F", "Favoritos" + LugaresFavoritos[h]);
+                h++;
+            }
+            i++;
+        }
     }
 
 }
